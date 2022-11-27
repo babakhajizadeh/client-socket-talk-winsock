@@ -36,6 +36,7 @@ void* connection_handler(void* socket_desc)
     }
     else if (read_size == -1)
     {
+        printf("wsa get last error: %d",WSAGetLastError());
         perror(" [!] Recv() system call failed! \n\r");
         printf(" [debug] the recv() method returned value:%d\n\r", read_size);
         closesocket(sock);
