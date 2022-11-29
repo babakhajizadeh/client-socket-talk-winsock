@@ -13,17 +13,20 @@ void* connection_handler(void* socket_desc)
     char message[100];
     char client_message[100];
 
-    strcpy(message, " [?] Type a message to get back:\n\r\0");
+    strcpy(message, " [Server] Type a message to get back:(MAX 67) \n");
     send(sock, message, strlen(message)+1, 0);
+    Sleep(200);
     while ((read_size = recv(sock, client_message, 100, 0)) > 0)
     {
-    //    printf(" [debug] client message recv() returned size is:%d\n", read_size);
-
+        printf(" [DEBUG] client message recv() returned size is:%d ", read_size); //for debuging
+        printf("strlen(): %d [%s] \n",(int)strlen(client_message),client_message); //for debuging
         //Send the message back to client
-        strcpy(message,"\n [i] server thread reply: \n\r\0");
-        send(sock, message, strlen(message) + 1, 0);
-        send(sock, client_message, read_size, 0);
+       //client_message[read_size] = '\0';
+        strcpy(message," [server] server thread reply:");
+        sprintf(message, "%s%s\n", message, client_message);
+        //printf(" [debug] strlen() message size: %d\n", ((int)(strlen(message))));
 
+        send(sock, message, strlen(message) + 1, 0);
 
     }
     printf("\n [errorno] %d", errno);
@@ -38,7 +41,7 @@ void* connection_handler(void* socket_desc)
     {
         printf("wsa get last error: %d",WSAGetLastError());
         perror(" [!] Recv() system call failed! \n\r");
-        printf(" [debug] the recv() method returned value:%d\n\r", read_size);
+        printf(" [DEBUG] the recv() method returned value:%d\n\r", read_size);
         closesocket(sock);
     }
 

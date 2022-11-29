@@ -13,7 +13,8 @@ int main(int argc, char const* argv[])
 	char message[100];
 	char socket_to_string[8];
 	pthread_t sniffer_thread;
-
+	char signal[3] = { "ok" };
+	int server_port;
 
 
 	printf(" [i] server side Initialising of Winsock...\n");
@@ -32,9 +33,13 @@ int main(int argc, char const* argv[])
 	}
 	printf(" [i] Server socket created.\n");
 
+
+	printf(" [?] Enter Port number for TCP communication: ");
+	scanf("%d",&server_port);
+
 	server.sin_addr.s_addr = INADDR_ANY;
 	server.sin_family = AF_INET;
-	server.sin_port = htons(8888);
+	server.sin_port = htons(server_port);
 
 	//Bind
 	if (bind(server_soc, (struct sockaddr*)&server, sizeof(server)) == SOCKET_ERROR)
@@ -58,13 +63,16 @@ int main(int argc, char const* argv[])
 
 	while ((new_socket = accept(server_soc, (struct sockaddr*)&client, &c)) != INVALID_SOCKET) {
 		printf(" [i] Connection accepted for socket: %d\n\r",(int)new_socket);
-		strcpy(message, " [i] Reply from server: connection has accepted.\n\r\0");
-		send(new_socket, message, strlen(message)+1, 0);
-		strcpy(message, " [i] creating connection handler created for socket id: \0");
-		send(new_socket, message, strlen(message)+1, 0);
-		strcpy(socket_to_string, "\0");
-		sprintf(socket_to_string, "%d\n\r\0", (int)new_socket);
-		send(new_socket, socket_to_string, strlen(socket_to_string)+1, 0);
+		strcpy(message, "\r [server] Connection has accepted.\n");
+		send(new_socket, message, strlen(message) + 1, 0);
+		strcpy(message, "\r [server] creating connection handler for socket id: ");
+		//strcpy(socket_to_string, "\0");
+		sprintf(socket_to_string, "%d\n", (int)new_socket);
+		sprintf(message, "%s%s", message, socket_to_string);
+		Sleep(200);
+		send(new_socket, message, strlen(message) + 1, 0);
+		Sleep(200);
+		send(new_socket, signal, strlen(signal) + 1, 0);
 
 		if (pthread_create(&sniffer_thread, NULL, connection_handler, (void*)new_socket) < 0)
 		{
